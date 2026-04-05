@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 const app      = express();
 const PORT     = process.env.PORT || 3001;
 const fs       = require('fs');
-const dashHTML = path.join(__dirname, '..', 'dashboard', 'index.html');
+const dashHTML = path.join(__dirname, 'dashboard', 'index.html');
 
 // ── PostgreSQL ────────────────────────────────────────────────────────────────
 const pool = new Pool({
@@ -35,7 +35,7 @@ app.use(express.json());
 // ── Serve dashboard — inject API_KEY from env at request time ────────────────
 app.get('/dashboard', (req, res) => {
   const html = fs.readFileSync(dashHTML, 'utf8').replace(
-    'window.__API_KEY__ || \'\'',
+    "window.__API_KEY__ || ''",
     `'${process.env.API_KEY}'`
   );
   res.setHeader('Content-Type', 'text/html');

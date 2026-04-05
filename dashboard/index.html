@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Julieta · Araneda Office</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system','BlinkMacSystemFont','SF Pro Display',
+                   'Segoe UI','system-ui','sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #1c1c1c 25%, #2a2a2a 50%, #1c1c1c 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.6s infinite;
+      border-radius: 8px;
+    }
+    @keyframes livepulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.85); }
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      animation: livepulse 2s ease-in-out infinite;
+      display: inline-block;
+    }
+    #activity-feed {
+      max-height: 300px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #2a2a2a transparent;
+    }
+    #activity-feed::-webkit-scrollbar { width: 3px; }
+    #activity-feed::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    .metric-num { font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  </style>
+</head>
+
+<body class="bg-[#0a0a0a] text-white font-sans antialiased min-h-screen">
+
+<div class="max-w-2xl mx-auto px-5 py-7 space-y-5">
+
+  <!-- ── Header ─────────────────────────────────────────────── -->
+  <header class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div>
+        <p class="text-[11px] text-gray-600 uppercase tracking-widest font-medium">Araneda Office</p>
+        <h1 class="text-base font-semibold text-white leading-tight">Julieta</h1>
+      </div>
+      <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full
+                  bg-emerald-500/10 border border-emerald-500/20">
+        <span class="live-dot"></span>
+        <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-widest">Live</span>
+      </div>
+    </div>
+
+    <!-- Month navigator -->
+    <div class="flex items-center gap-1">
+      <button id="btn-prev"
+        class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500
+               hover:text-white hover:bg-white/5 transition-colors text-sm">‹</button>
+      <span id="month-label"
+        class="text-sm font-medium text-gray-300 min-w-[110px] text-center select-none"></span>
+      <button id="btn-next"
+        class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500
+               hover:text-white hover:bg-white/5 transition-colors text-sm">›</button>
+    </div>
+  </header>
+
+  <!-- ── 3 Hero Metrics ─────────────────────────────────────── -->
+  <section class="grid grid-cols-3 gap-3">
+
+    <!-- Revenue -->
+    <div class="bg-[#111] border border-[#1e1e1e] rounded-2xl p-5 space-y-2">
+      <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Revenue</p>
+      <p id="metric-revenue" class="metric-num text-4xl font-bold text-emerald-400 leading-none">
+        <span class="skeleton block h-9 w-24">&nbsp;</span>
+      </p>
+      <div id="trend-revenue" class="h-4"></div>
+    </div>
+
+    <!-- Appointments -->
+    <div class="bg-[#111] border border-[#1e1e1e] rounded-2xl p-5 space-y-2">
+      <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Citas</p>
+      <p id="metric-appointments" class="metric-num text-4xl font-bold text-sky-400 leading-none">
+        <span class="skeleton block h-9 w-14">&nbsp;</span>
+      </p>
+      <div id="trend-appointments" class="h-4"></div>
+    </div>
+
+    <!-- Hours saved -->
+    <div class="bg-[#111] border border-[#1e1e1e] rounded-2xl p-5 space-y-2">
+      <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Tiempo Libre</p>
+      <p id="metric-hours" class="metric-num text-4xl font-bold text-violet-400 leading-none">
+        <span class="skeleton block h-9 w-16">&nbsp;</span>
+      </p>
+      <div id="trend-hours" class="h-4"></div>
+    </div>
+
+  </section>
+
+  <!-- ── ROI Line ───────────────────────────────────────────── -->
+  <div class="bg-emerald-500/5 border border-emerald-500/15 rounded-xl px-5 py-3
+              flex items-center justify-between gap-4">
+    <p class="text-sm text-gray-400 leading-snug">
+      Si tu hora vale
+      <span class="text-white">$<input id="hourly-rate" type="number" value="50"
+        min="1" max="9999"
+        class="w-14 bg-transparent border-b border-emerald-400/30 text-emerald-300
+               font-semibold text-center focus:outline-none focus:border-emerald-400
+               transition-colors">/hr</span>,
+      Julieta te ahorró
+      <span id="roi-value" class="text-emerald-400 font-bold">—</span>
+      este mes.
+    </p>
+    <span id="last-updated" class="text-[11px] text-gray-600 shrink-0">—</span>
+  </div>
+
+  <!-- ── Breakdown pills ───────────────────────────────────── -->
+  <div id="breakdown-row" class="flex flex-wrap gap-2"></div>
+
+  <!-- ── Top Servicios ────────────────────────────────────── -->
+  <section id="services-section" class="hidden">
+    <h2 class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-2">
+      Top Servicios
+    </h2>
+    <div id="services-list" class="bg-[#111] border border-[#1e1e1e] rounded-2xl overflow-hidden p-1.5 space-y-0.5"></div>
+  </section>
+
+  <!-- ── Activity Feed ─────────────────────────────────────── -->
+  <section>
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+        Actividad Reciente
+      </h2>
+      <span id="events-count" class="text-[11px] text-gray-600"></span>
+    </div>
+
+    <div class="bg-[#111] border border-[#1e1e1e] rounded-2xl overflow-hidden p-1.5">
+      <div id="activity-feed" class="space-y-0.5">
+        <div class="skeleton h-10 rounded-xl"></div>
+        <div class="skeleton h-10 rounded-xl opacity-70"></div>
+        <div class="skeleton h-10 rounded-xl opacity-40"></div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /max-w-2xl -->
+
+<script>
+const CONFIG = {
+  API_URL: '',
+  API_KEY: window.__API_KEY__ || '',
+  REFRESH_MS: 15_000,
+};
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let currentMonth = null; // null = this month, or 'YYYY-MM'
+let cachedStats  = null;
+let timer        = null;
+
+// ═══════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════
+function fmt$(n) {
+  if (n === null || n === undefined) return '—';
+  return '$' + Number(n).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtRelTime(iso) {
+  const diff  = Date.now() - new Date(iso).getTime();
+  const mins  = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days  = Math.floor(diff / 86_400_000);
+  if (mins  < 1)  return 'ahora';
+  if (mins  < 60) return `${mins}min`;
+  if (hours < 24) return `${hours}h`;
+  if (days  < 30) return `${days}d`;
+  return new Date(iso).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+}
+
+function trendBadge(pct) {
+  if (pct === null || pct === undefined) return '';
+  const sign  = pct >= 0 ? '+' : '';
+  const cls   = pct >= 0
+    ? 'text-emerald-400 bg-emerald-500/10'
+    : 'text-red-400 bg-red-500/10';
+  return `<span class="inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${cls}">
+    ${sign}${pct}%</span>`;
+}
+
+function monthLabel(m) {
+  if (!m) {
+    const n = new Date();
+    return n.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+  }
+  const [y, mo] = m.split('-').map(Number);
+  return new Date(y, mo - 1, 1).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+}
+
+function navigateMonth(delta) {
+  const now = new Date();
+  let y, mo;
+  if (!currentMonth) { y = now.getFullYear(); mo = now.getMonth() + 1; }
+  else { [y, mo] = currentMonth.split('-').map(Number); }
+
+  mo += delta;
+  if (mo > 12) { mo = 1;  y++; }
+  if (mo < 1)  { mo = 12; y--; }
+
+  const target   = new Date(y, mo - 1, 1);
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  if (target > thisMonth) return; // don't go to future
+
+  currentMonth = target.getTime() === thisMonth.getTime()
+    ? null
+    : `${y}-${String(mo).padStart(2, '0')}`;
+
+  document.getElementById('month-label').textContent = monthLabel(currentMonth);
+  refresh();
+}
+
+const EVENT_META = {
+  appointment_booked:      { icon: '📅', label: 'Reserva',         color: 'text-emerald-400' },
+  appointment_rescheduled: { icon: '🔄', label: 'Reagendamiento',  color: 'text-sky-400'     },
+  appointment_cancelled:   { icon: '✕',  label: 'Cancelación',    color: 'text-red-400'     },
+  inquiry_answered:        { icon: '💬', label: 'Consulta',        color: 'text-violet-400'  },
+};
+
+// ═══════════════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════════════
+async function apiFetch(path) {
+  const r = await fetch(CONFIG.API_URL + path, {
+    headers: { 'X-API-Key': CONFIG.API_KEY },
+    cache: 'no-store',
+  });
+  if (!r.ok) throw new Error(`API ${r.status}`);
+  return r.json();
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function renderStats(data) {
+  const { current: c, trends: t } = data;
+
+  document.getElementById('metric-revenue').textContent      = fmt$(c.total_revenue);
+  document.getElementById('metric-appointments').textContent = c.total_appointments;
+  document.getElementById('metric-hours').textContent        = c.total_hours_saved + 'h';
+  document.getElementById('trend-revenue').innerHTML         = trendBadge(t.revenue);
+  document.getElementById('trend-appointments').innerHTML    = trendBadge(t.appointments);
+  document.getElementById('trend-hours').innerHTML           = trendBadge(t.hours_saved);
+
+  updateROI(c.total_hours_saved);
+
+  // Breakdown pills
+  const pills = [
+    { label: 'Reservas',        count: c.booked,      cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+    { label: 'Reagendamientos', count: c.rescheduled, cls: 'text-sky-400 bg-sky-500/10 border-sky-500/20'            },
+    { label: 'Cancelaciones',   count: c.cancelled,   cls: 'text-red-400 bg-red-500/10 border-red-500/20'            },
+  ];
+  document.getElementById('breakdown-row').innerHTML = pills.map(p =>
+    `<div class="flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-medium ${p.cls}">
+      <span class="font-bold text-sm">${p.count}</span>${p.label}
+    </div>`
+  ).join('');
+
+  document.getElementById('last-updated').textContent =
+    'Act. ' + new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+}
+
+function updateROI(hoursSaved) {
+  const rate = parseFloat(document.getElementById('hourly-rate').value) || 50;
+  document.getElementById('roi-value').textContent = fmt$(Math.round(rate * hoursSaved));
+}
+
+function renderEvents(data) {
+  document.getElementById('events-count').textContent = `${data.count} eventos`;
+  const feed = document.getElementById('activity-feed');
+
+  if (!data.events?.length) {
+    feed.innerHTML = `<div class="text-center py-8 text-gray-600 text-sm">Sin actividad aún.</div>`;
+    return;
+  }
+
+  feed.innerHTML = data.events.map(e => {
+    const m     = EVENT_META[e.event_type] || { icon: '·', label: e.event_type, color: 'text-gray-400' };
+    const price = e.service_price > 0 ? `<span class="text-emerald-400 font-semibold">${fmt$(e.service_price)}</span>` : '';
+    const convo = e.conversation_id ? `<span class="text-gray-700 text-[10px]">#${e.conversation_id}</span>` : '';
+
+    return `
+      <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl
+                  hover:bg-white/[0.025] transition-colors">
+        <span class="text-base w-5 text-center shrink-0">${m.icon}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 text-[13px]">
+            <span class="${m.color} font-medium shrink-0">${m.label}</span>
+            <span class="text-white truncate">${e.client_name || 'Cliente'}</span>
+            ${e.service_name ? `<span class="text-gray-500 truncate hidden sm:block text-xs">${e.service_name}</span>` : ''}
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          ${price}${convo}
+          <span class="text-gray-600 text-[11px]">${fmtRelTime(e.created_at)}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  SERVICES RENDER
+// ═══════════════════════════════════════════════════════
+function renderServices(data) {
+  if (!data.services?.length) return;
+  const section = document.getElementById('services-section');
+  const list    = document.getElementById('services-list');
+  section.classList.remove('hidden');
+
+  const maxCount = data.services[0].count || 1;
+  list.innerHTML = data.services.map(s => {
+    const pct   = Math.round((s.count / maxCount) * 100);
+    const rev   = parseFloat(s.revenue) > 0 ? fmt$(parseFloat(s.revenue)) : '';
+    return `
+      <div class="px-3 py-2.5 rounded-xl hover:bg-white/[0.025] transition-colors">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[13px] text-white font-medium truncate">${s.service_name}</span>
+          <div class="flex items-center gap-2 shrink-0 ml-2">
+            ${rev ? `<span class="text-[11px] text-emerald-400">${rev}</span>` : ''}
+            <span class="text-[11px] font-semibold text-sky-400">${s.count} cita${s.count !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+        <div class="h-1 bg-white/5 rounded-full overflow-hidden">
+          <div class="h-full bg-sky-500/50 rounded-full transition-all duration-500" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  REFRESH CYCLE
+// ═══════════════════════════════════════════════════════
+async function refresh() {
+  try {
+    const qs = currentMonth ? `?month=${currentMonth}` : '';
+    const [stats, events, services] = await Promise.all([
+      apiFetch(`/api/stats${qs}`),
+      apiFetch('/api/events?limit=12'),
+      apiFetch(`/api/services${qs}`),
+    ]);
+    cachedStats = stats;
+    renderStats(stats);
+    renderEvents(events);
+    renderServices(services);
+  } catch (err) {
+    console.error('Dashboard refresh error:', err.message);
+    document.getElementById('last-updated').textContent = 'Error — reintentando…';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('month-label').textContent = monthLabel(null);
+  document.getElementById('btn-prev').addEventListener('click', () => navigateMonth(-1));
+  document.getElementById('btn-next').addEventListener('click', () => navigateMonth(+1));
+  document.getElementById('hourly-rate').addEventListener('input', () => {
+    if (cachedStats) updateROI(cachedStats.current.total_hours_saved);
+  });
+
+  refresh();
+  timer = setInterval(refresh, CONFIG.REFRESH_MS);
+});
+</script>
+</body>
+</html>

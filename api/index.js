@@ -225,8 +225,8 @@ app.get('/api/services', requireApiKey, async (req, res) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-const server = app.listen(PORT, () => {
-  console.log(`Julieta Dashboard API running on port ${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`--- SERVIDOR INICIANDO --- puerto ${PORT}`);
 });
 
 server.on('error', (err) => {

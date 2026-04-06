@@ -14,10 +14,11 @@ services:
       - traefik.http.routers.julieta-dashboard.tls.certresolver=letsencrypt
       - traefik.http.services.julieta-dashboard.loadbalancer.server.port=${PORT:-3001}
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:${PORT:-3001}/health"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/health"]
       interval: 120s
       timeout: 10s
       retries: 3
+      start_period: 30s
     logging:
       driver: json-file
       options:

@@ -33,6 +33,8 @@ app.use(cors({
 app.use(express.json());
 
 // ── Serve dashboard — inject API_KEY from env at request time ────────────────
+app.get('/', (req, res) => res.redirect('/dashboard'));
+
 app.get('/dashboard', (req, res) => {
   const html = fs.readFileSync(dashHTML, 'utf8').replace(
     "window.__API_KEY__ || ''",

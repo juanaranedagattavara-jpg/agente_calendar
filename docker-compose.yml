@@ -1,6 +1,6 @@
 services:
   api:
-    build: ./api
+    build: .
     restart: unless-stopped
     environment:
       DATABASE_URL: ${DATABASE_URL}

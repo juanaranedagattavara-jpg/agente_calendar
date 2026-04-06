@@ -161,8 +161,8 @@ app.get('/api/stats', requireApiKey, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('/api/stats error:', err.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('[ERROR /api/stats]', err.stack || err);
+    res.status(500).json({ error: 'Internal server error', detail: err.message });
   }
 });
 
@@ -184,8 +184,8 @@ app.get('/api/events', requireApiKey, async (req, res) => {
     res.json({ events: result.rows, count: result.rows.length });
 
   } catch (err) {
-    console.error('/api/events error:', err.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('[ERROR /api/events]', err.stack || err);
+    res.status(500).json({ error: 'Internal server error', detail: err.message });
   }
 });
 
@@ -219,8 +219,8 @@ app.get('/api/services', requireApiKey, async (req, res) => {
 
     res.json({ services: result.rows });
   } catch (err) {
-    console.error('/api/services error:', err.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('[ERROR /api/services]', err.stack || err);
+    res.status(500).json({ error: 'Internal server error', detail: err.message });
   }
 });
 

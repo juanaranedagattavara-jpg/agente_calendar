@@ -1,3 +1,12 @@
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught exception:', err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled rejection:', reason);
+  process.exit(1);
+});
+
 require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
@@ -204,8 +213,11 @@ app.get('/api/services', requireApiKey, async (req, res) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`Julieta Dashboard API → http://localhost:${PORT}`);
-  console.log(`Dashboard            → http://localhost:${PORT}/dashboard`);
-  console.log(`Health check         → http://localhost:${PORT}/health`);
+const server = app.listen(PORT, () => {
+  console.log(`Julieta Dashboard API running on port ${PORT}`);
+});
+
+server.on('error', (err) => {
+  console.error('[FATAL] Server failed to start:', err);
+  process.exit(1);
 });

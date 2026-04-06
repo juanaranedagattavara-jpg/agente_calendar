@@ -1,3 +1,5 @@
+console.log('[START] Julieta API booting...');
+
 process.on('uncaughtException', (err) => {
   console.error('[FATAL] Uncaught exception:', err);
   process.exit(1);
@@ -5,6 +7,10 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason) => {
   console.error('[FATAL] Unhandled rejection:', reason);
   process.exit(1);
+});
+process.on('SIGTERM', () => {
+  console.log('[SIGNAL] SIGTERM received — EasyPanel is stopping the container');
+  process.exit(0);
 });
 
 require('dotenv').config();
@@ -42,16 +48,17 @@ app.use(cors({
 app.use(express.json());
 
 // ── Serve dashboard — inject API_KEY from env at request time ────────────────
-app.get('/', (req, res) => res.redirect('/dashboard'));
-
-app.get('/dashboard', (req, res) => {
+function serveDashboard(req, res) {
   const html = fs.readFileSync(dashHTML, 'utf8').replace(
     "window.__API_KEY__ || ''",
     `'${process.env.API_KEY}'`
   );
   res.setHeader('Content-Type', 'text/html');
   res.send(html);
-});
+}
+
+app.get('/', serveDashboard);
+app.get('/dashboard', serveDashboard);
 
 // ── Auth middleware ───────────────────────────────────────────────────────────
 function requireApiKey(req, res, next) {
@@ -67,11 +74,16 @@ function requireApiKey(req, res, next) {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
-// Health check — no auth required (for uptime monitors)
-app.get('/health', async (req, res) => {
+// Health check — process liveness only, no DB query
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// DB readiness check — separate endpoint for monitoring
+app.get('/health/ready', async (req, res) => {
   try {
     await pool.query('SELECT 1');
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', db: 'connected' });
   } catch (err) {
     res.status(503).json({ status: 'error', message: err.message });
   }
